@@ -1,0 +1,11 @@
+name = "khetat-najahi"
+main = "worker-api.js"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "STUDY"
+id = "PUT_KV_ID_HERE"

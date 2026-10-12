@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مسار الإنجاز · Output Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<style>
+:root,:root[data-theme="dark"]{--bg:#0d1017;--card:#161b26;--ink:#e8ebf2;--mut:#8a93a6;--pri:#f2b544;--on:#1a1203;--acc:#6fb3ff;--line:#252c3b;--ok:#5fd0a0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#f1f3f8;--card:#fff;--ink:#141a28;--mut:#5d667a;--pri:#c77d0a;--on:#fff;--acc:#2f6fd0;--line:#dde2ec;--ok:#1f9d6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;transition:background .3s,color .3s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;transition:background .3s,border-color .3s}
+.mut{color:var(--mut)}.pri{color:var(--pri)}
+.btn{background:var(--pri);color:var(--on);border-radius:12px;padding:9px 16px;font-weight:600;transition:transform .15s,opacity .2s}
+.btn:active{transform:scale(.96)}.btn.g{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,.inp:focus-visible,.nv:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.inp{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.tr{transition:width .6s ease,height .6s ease}
+.trk{height:8px;border-radius:99px;background:var(--line)}.trk>div{height:8px;border-radius:99px;background:var(--pri)}
+.ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--pri);color:var(--on);flex:none;display:grid;place-items:center;transition:background .2s}.ck.on{background:var(--pri)}
+nav{position:fixed;inset-inline:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+.nv{flex:1;font-size:12px;color:var(--mut);padding:6px 2px;border-radius:10px;transition:color .2s}.nv.on{color:var(--pri);font-weight:700}.nv span{display:block;font-size:20px}
+.fade{animation:f .3s ease}@keyframes f{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));inset-inline:16px;max-width:420px;margin:auto;background:var(--ink);color:var(--bg);padding:10px;border-radius:12px;text-align:center;display:none;z-index:9}
+</style>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0d1017"><link rel="icon" href="/icon.svg"><link rel="apple-touch-icon" href="/icon.svg">
+</head>
+<body>
+<div id="toast"></div>
+<div id="app" class="max-w-3xl mx-auto px-4 pt-4 pb-28"></div>
+<nav><div id="nav" class="max-w-3xl mx-auto flex"></div></nav>
+<script>
+const L={ar:{app:'مسار الإنجاز',dash:'الرئيسية',goals:'الأهداف',study:'الدراسة',tests:'الاختبارات',set:'الإعدادات',today:'اليوم',min:'دقيقة',ses:'جلسات',hrs:'ساعات هذا الأسبوع',gw:'أهداف الأسبوع',gm:'أهداف الشهر',gb:'أهداف الشهرين',avg:'معدل الاختبارات',l7:'آخر 7 أيام (دقائق)',bys:'حسب المادة (هذا الأسبوع)',trend:'تطور الدرجات',none:'لا توجد بيانات بعد',week:'أسبوعي',month:'شهري',bi:'شهرين',subj:'المادة',title:'الهدف (اختياري)',target:'العدد المستهدف',add:'إضافة',empty:'ابدأ بإضافة هدفك الأول',focus:'تركيز',brk:'استراحة',start:'ابدأ',pause:'إيقاف مؤقت',fin:'أنهيت',reset:'إعادة',manual:'تسجيل يدوي',mins:'الدقائق',date:'التاريخ',type:'النوع',fri:'اختبار شامل (الجمعة)',prac:'اختبار تدريبي',exam:'امتحان',score:'الدرجة',max:'من',weak:'نقاط الضعف / ما يجب مراجعته',save:'حفظ',sm:'مدة الجلسة (دقيقة)',bm:'مدة الاستراحة (دقيقة)',pd:'عدد الجلسات يومياً',sl:'المواد (افصل بفاصلة ،)',lang:'اللغة',theme:'الوضع',saved:'تم الحفظ',rev:'للمراجعة',totw:'مجموع هذا الأسبوع',totm:'مجموع هذا الشهر',tota:'المجموع الكلي',hr:'ساعة',cfg:'إعدادات الدراسة',dg:'هدف الدراسة اليومي (ساعات)',st:'سلسلة الأيام',dd:'يوم',vs:'عن الأسبوع الماضي',carry:'ترحيل غير المنجز من الفترة السابقة',exd:'امتحاناتي القادمة',exn:'اسم الامتحان',exp:'تصدير (نسخ)',imp:'استيراد',bkh:'نسخة احتياطية: اضغط تصدير ثم احفظ النص في مكان آمن. للاستيراد الصق النص هنا واضغط استيراد',copied:'تم النسخ',bad:'نص غير صالح',syn:'محفوظ على السيرفر',synE:'تعذّر الحفظ على السيرفر',log:'السجل',done:'مكتمل'},
+en:{app:'Output Tracker',dash:'Home',goals:'Goals',study:'Study',tests:'Tests',set:'Settings',today:'Today',min:'min',ses:'sessions',hrs:'hours this week',gw:'Weekly goals',gm:'Monthly goals',gb:'2-month goals',avg:'Avg test score',l7:'Last 7 days (minutes)',bys:'By subject (this week)',trend:'Score trend',none:'No data yet',week:'Weekly',month:'Monthly',bi:'2 months',subj:'Subject',title:'Goal (optional)',target:'Target count',add:'Add',empty:'Add your first goal',focus:'Focus',brk:'Break',start:'Start',pause:'Pause',fin:'Finish',reset:'Reset',manual:'Manual log',mins:'Minutes',date:'Date',type:'Type',fri:'Friday comprehensive',prac:'Practice test',exam:'Exam',score:'Score',max:'out of',weak:'Weak points to review',save:'Save',sm:'Session length (min)',bm:'Break length (min)',pd:'Sessions per day',sl:'Subjects (comma separated)',lang:'Language',theme:'Theme',saved:'Saved',rev:'To review',totw:'This week total',totm:'This month total',tota:'All-time total',hr:'hours',cfg:'Study settings',dg:'Daily study goal (hours)',st:'Day streak',dd:'days',vs:'vs last week',carry:'Carry over unfinished goals',exd:'Upcoming exams',exn:'Exam name',exp:'Export (copy)',imp:'Import',bkh:'Backup: tap Export and save the text somewhere safe. To restore, paste it here and tap Import',copied:'Copied',bad:'Invalid text',syn:'Saved to server',synE:'Server save failed',log:'Log',done:'Done'}};
+let S;try{S=JSON.parse(localStorage.getItem('otr1'))}catch(e){}
+S=S||{cfg:{sm:45,bm:10,pd:6,lang:'ar',theme:'dark',subs:['رياضيات','فيزياء','كيمياء','أحياء','إنجليزي','عربي','إسلامية']},goals:[],logs:[],tests:[]};
+S.exams=S.exams||[];S.cfg.dg=S.cfg.dg||3;let cfgOpen=false;
+let cloud=null,sy='off',pt;
+const save=()=>{S.ts=Date.now();try{localStorage.setItem('otr1',JSON.stringify(S))}catch(e){}if(cloud){sy='..';paintSync();clearTimeout(pt);pt=setTimeout(push,1000)}};
+async function push(){try{await cloud.set({json:JSON.stringify(S),ts:S.ts||0});sy='ok'}catch(e){sy='err'}paintSync()}
+function paintSync(){const e=document.getElementById('sy');if(e)e.textContent=sy=='ok'?'☁️ '+t('syn'):sy=='err'?'⚠️ '+t('synE'):sy=='..'?'☁️ …':''}
+const t=k=>L[S.cfg.lang][k]||k,uid=()=>Math.random().toString(36).slice(2,9);
+const $=i=>document.getElementById(i),v=i=>$(i).value;
+const dk=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const pd=s=>{const[a,b,c]=s.split('-');return new Date(+a,+b-1,+c)};
+const wk=d=>{const x=new Date(d);x.setDate(x.getDate()-(x.getDay()+1)%7);return dk(x)};
+const per=(sc,d=new Date())=>sc=='week'?wk(d):sc=='month'?d.getFullYear()+'-'+d.getMonth():d.getFullYear()+'-b'+Math.floor(d.getMonth()/2);
+let page='dash',gs='week',tm={mode:'f',left:S.cfg.sm*60,run:false,sub:S.cfg.subs[0]},timerId;
+const mm=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+const bar=p=>`<div class="trk"><div class="tr" style="width:${p}%"></div></div>`;
+const opts=(a,sel)=>a.map(x=>`<option ${x==sel?'selected':''}>${x}</option>`).join('');
+function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2500)}
+function apply(){const r=document.documentElement;r.dataset.theme=S.cfg.theme;r.lang=S.cfg.lang;r.dir=S.cfg.lang=='ar'?'rtl':'ltr'}
+function gp(sc){const g=S.goals.filter(x=>x.sc==sc&&x.p==per(sc));const T=g.reduce((a,x)=>a+x.t,0),D=g.reduce((a,x)=>a+Math.min(x.d,x.t),0);return{g,pct:T?Math.round(D/T*100):0,n:g.filter(x=>x.d>=x.t).length}}
+const minsOn=ds=>S.logs.filter(l=>l.date==ds).reduce((a,l)=>a+l.m,0);
+function dashOld(){const td=dk(new Date()),tl=S.logs.filter(l=>l.date==td),w=wk(new Date()),wl=S.logs.filter(l=>wk(pd(l.date))==w);
+const wm=wl.reduce((a,l)=>a+l.m,0),days=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return[dk(d),minsOn(dk(d))]}),mx=Math.max(60,...days.map(x=>x[1]));
+const bs={};wl.forEach(l=>bs[l.s]=(bs[l.s]||0)+l.m);const bk=Object.entries(bs).sort((a,b)=>b[1]-a[1]);
+const ts=S.tests.slice().sort((a,b)=>a.date<b.date?-1:1).slice(-10).map(x=>Math.round(x.sc/x.mx*100)),av=ts.length?Math.round(ts.reduce((a,b)=>a+b,0)/ts.length):null;
+const ring=(p,l)=>`<div class="card text-center"><div class="text-3xl font-bold pri">${p}%</div><div class="mut text-sm mt-1">${l}</div>${bar(p)}</div>`;
+const gW=gp('week'),gM=gp('month'),gB=gp('bi');
+const pts=ts.map((p,i)=>`${ts.length>1?i*300/(ts.length-1):150},${100-p}`).join(' ');
+return `<div class="fade space-y-3"><div class="grid grid-cols-2 gap-3"><div class="card"><div class="text-3xl font-bold pri">${tl.reduce((a,l)=>a+l.m,0)}<span class="text-base mut"> ${t('min')}</span></div><div class="mut text-sm">${t('today')} · ${tl.length}/${S.cfg.pd} ${t('ses')}</div>${bar(Math.min(100,tl.length/S.cfg.pd*100))}</div><div class="card"><div class="text-3xl font-bold" style="color:var(--acc)">${(wm/60).toFixed(1)}</div><div class="mut text-sm">${t('hrs')}</div></div></div>
+<div class="grid grid-cols-3 gap-3">${ring(gW.pct,t('gw'))}${ring(gM.pct,t('gm'))}${ring(gB.pct,t('gb'))}</div>
+<div class="card"><div class="font-semibold mb-3">${t('l7')}</div><div class="flex gap-2 items-end h-28">${days.map(([d,m])=>`<div class="flex-1 text-center text-xs mut"><div class="tr rounded-t-md mb-1" style="height:${m/mx*80}px;min-height:3px;background:var(--acc)"></div>${m}<br>${pd(d).getDate()}</div>`).join('')}</div></div>
+<div class="card"><div class="font-semibold mb-3">${t('bys')}</div>${bk.length?bk.map(([s,m])=>`<div class="mb-2"><div class="flex justify-between text-sm"><span>${s}</span><span class="mut">${m} ${t('min')}</span></div>${bar(m/bk[0][1]*100)}</div>`).join(''):`<p class="mut">${t('none')}</p>`}</div>
+<div class="card"><div class="flex justify-between mb-2"><span class="font-semibold">${t('trend')}</span><span class="pri font-bold">${av==null?'':av+'%'}</span></div>${ts.length?`<svg viewBox="-6 -6 312 112" class="w-full h-28"><polyline fill="none" stroke="var(--pri)" stroke-width="3" stroke-linejoin="round" points="${pts}"/>${ts.map((p,i)=>`<circle r="4" fill="var(--pri)" cx="${ts.length>1?i*300/(ts.length-1):150}" cy="${100-p}"/>`).join('')}</svg>`:`<p class="mut">${t('none')}</p>`}</div></div>`}
+function dash(){const T=new Date(),td=dk(T),tmin=minsOn(td),gm=S.cfg.dg*60,nS=S.logs.filter(l=>l.date==td).length,sW=k=>S.logs.filter(l=>wk(pd(l.date))==k),wl=sW(wk(T)),wm=wl.reduce((a,l)=>a+l.m,0),pm=sW(wk(new Date(T-7*864e5))).reduce((a,l)=>a+l.m,0),df=wm-pm;
+let sk=0;for(let i=0;i<400;i++){const d=new Date(T);d.setDate(d.getDate()-i);if(minsOn(dk(d))>=gm)sk++;else if(i)break}
+const days=[...Array(7)].map((_,i)=>{const d=new Date(T);d.setDate(d.getDate()-6+i);return[dk(d),minsOn(dk(d))]}),mx=Math.max(60,...days.map(x=>x[1])),bs={};wl.forEach(l=>bs[l.s]=(bs[l.s]||0)+l.m);const bk=Object.entries(bs).sort((a,b)=>b[1]-a[1]);
+return `<div class="fade space-y-3"><div class="card"><div class="flex justify-between items-end"><div><div class="mut text-sm">${t('today')}</div><div class="text-4xl font-bold pri">${(tmin/60).toFixed(1)}<span class="text-base mut"> / ${S.cfg.dg} ${t('hr')}</span></div></div><div class="mut text-sm">${nS}/${S.cfg.pd} ${t('ses')}</div></div><div class="my-3">${bar(Math.min(100,tmin/gm*100))}</div><button class="btn w-full" onclick="page='study';render()">⏱ ${t('study')}</button></div>
+<div class="grid grid-cols-2 gap-3"><div class="card"><div class="text-3xl font-bold pri">🔥 ${sk}</div><div class="mut text-sm">${t('st')} (${t('dd')})</div></div><div class="card"><div class="text-3xl font-bold" style="color:var(--acc)">${(wm/60).toFixed(1)}</div><div class="mut text-sm">${t('hrs')}</div><div class="text-xs mt-1" style="color:${df>=0?'var(--ok)':'var(--mut)'}">${df>=0?'▲':'▼'} ${Math.abs(df)} ${t('min')} ${t('vs')}</div></div></div>
+<div class="card"><div class="font-semibold mb-3">${t('l7')}</div><div class="flex gap-2 items-end h-28">${days.map(([d,m])=>`<div class="flex-1 text-center text-xs mut"><div class="tr rounded-t-md mb-1" style="height:${m/mx*80}px;min-height:3px;background:var(--acc)"></div>${m}<br>${pd(d).getDate()}</div>`).join('')}</div></div>
+<div class="card"><div class="font-semibold mb-3">${t('bys')}</div>${bk.length?bk.map(([s,m])=>`<div class="mb-2"><div class="flex justify-between text-sm"><span>${s}</span><span class="mut">${m} ${t('min')}</span></div>${bar(m/bk[0][1]*100)}</div>`).join(''):`<p class="mut">${t('none')}</p>`}</div></div>`}
+const prevD=sc=>{const d=new Date();return sc=='week'?new Date(d-7*864e5):new Date(d.getFullYear(),d.getMonth()-(sc=='bi'?2:1),1)};
+const prevLeft=()=>S.goals.filter(x=>x.sc==gs&&x.p==per(gs,prevD(gs))&&x.d<x.t&&!S.goals.some(y=>y.p==per(gs)&&y.sc==gs&&y.s==x.s&&y.ti==x.ti)).length;
+function carry(){const pk=per(gs,prevD(gs)),cur=per(gs);S.goals.filter(x=>x.sc==gs&&x.p==pk&&x.d<x.t).forEach(x=>{if(!S.goals.some(y=>y.p==cur&&y.sc==gs&&y.s==x.s&&y.ti==x.ti))S.goals.push({id:uid(),sc:gs,p:cur,s:x.s,ti:x.ti,t:x.t-x.d,d:0})});save();toast(t('saved'));render()}
+function exCard(){const td=pd(dk(new Date())),ex=S.exams.slice().sort((a,b)=>a.date<b.date?-1:1).filter(x=>pd(x.date)>=td);return `<div class="card"><b>${t('exd')}</b>${ex.map(x=>{const n=Math.round((pd(x.date)-td)/864e5);return `<div class="flex justify-between items-center mt-2"><span>${x.n} <span class="mut text-sm">${x.date}</span></span><span><b class="pri">${n}</b> <span class="mut text-sm">${t('dd')}</span> <button class="mut" onclick="exx('${x.id}')" aria-label="delete">✕</button></span></div>`}).join('')}<div class="grid grid-cols-6 gap-2 mt-3"><input id="en" class="inp col-span-3" placeholder="${t('exn')}"><input id="ed" type="date" class="inp col-span-3"><button class="btn col-span-6" onclick="addE()">${t('add')}</button></div></div>`}
+function addE(){if(!v('en').trim()||!v('ed'))return;S.exams.push({id:uid(),n:v('en').trim(),date:v('ed')});save();render()}
+function exx(id){S.exams=S.exams.filter(x=>x.id!=id);save();render()}
+function expD(){const e=$('bk');e.value=JSON.stringify(S);e.select();try{navigator.clipboard.writeText(e.value);toast(t('copied'))}catch(x){}}
+function impD(){try{const d=JSON.parse(v('bk'));if(!d.cfg||!d.logs)throw 0;S=d;S.exams=S.exams||[];S.cfg.dg=S.cfg.dg||3;save();apply();toast(t('saved'));render()}catch(x){toast(t('bad'))}}
+function goals(){const {g,pct,n}=gp(gs),cl=prevLeft(),sc=['week','month','bi'];
+return `<div class="fade space-y-3"><div class="flex gap-2">${sc.map(s=>`<button class="btn ${s==gs?'':'g'} flex-1" onclick="gs='${s}';render()">${t(s)}</button>`).join('')}</div>
+<div class="card"><div class="flex justify-between mb-2"><b>${pct}%</b><span class="mut">${n}/${g.length} ${t('done')}</span></div>${bar(pct)}</div>
+${cl?`<button class="btn g w-full" onclick="carry()">↪ ${t('carry')} (${cl})</button>`:''}<div class="card grid grid-cols-6 gap-2"><select id="gsub" class="inp col-span-3">${opts(S.cfg.subs)}</select><input id="gt" type="number" min="1" value="1" class="inp col-span-3" aria-label="${t('target')}"><input id="gti" class="inp col-span-4" placeholder="${t('title')}"><button class="btn col-span-2" onclick="addG()">${t('add')}</button></div>
+${g.length?g.map(x=>`<div class="card flex items-center gap-3"><button class="ck ${x.d>=x.t?'on':''}" onclick="gk('${x.id}')" aria-label="${t('done')}">${x.d>=x.t?'✓':''}</button><div class="flex-1 min-w-0"><div class="flex justify-between"><b class="truncate">${x.s}${x.ti?' · '+x.ti:''}</b><span class="mut text-sm">${x.d}/${x.t}</span></div><div class="mt-2">${bar(Math.min(100,x.d/x.t*100))}</div></div><button class="btn g" onclick="gd('${x.id}',-1)" aria-label="-">−</button><button class="btn" onclick="gd('${x.id}',1)" aria-label="+">+</button><button class="mut" onclick="gx('${x.id}')" aria-label="delete">✕</button></div>`).join(''):`<p class="mut text-center py-6">${t('empty')}</p>`}</div>`}
+function addG(){S.goals.push({id:uid(),sc:gs,p:per(gs),s:v('gsub'),ti:v('gti').trim(),t:Math.max(1,+v('gt')||1),d:0});save();render()}
+const gf=id=>S.goals.find(x=>x.id==id);
+function gd(id,n){const x=gf(id);x.d=Math.max(0,x.d+n);save();render()}
+function gk(id){const x=gf(id);x.d=x.d>=x.t?0:x.t;save();render()}
+function gx(id){S.goals=S.goals.filter(x=>x.id!=id);save();render()}
+function study(){const td=dk(new Date()),tl=S.logs.filter(l=>l.date==td);
+return `<div class="fade space-y-3"><div class="card text-center"><select id="tsub" class="inp mb-3" onchange="tm.sub=this.value">${opts(S.cfg.subs,tm.sub)}</select><div class="mut">${tm.mode=='f'?t('focus'):t('brk')}</div><div id="tmv" class="text-6xl font-bold my-2" style="font-variant-numeric:tabular-nums">${mm(tm.left)}</div><div class="flex gap-2 justify-center"><button class="btn" onclick="tmGo()">${tm.run?t('pause'):t('start')}</button>${tm.mode=='f'?`<button class="btn g" onclick="tmFin()">${t('fin')}</button>`:''}<button class="btn g" onclick="tmReset()">${t('reset')}</button></div></div>
+<div class="card grid grid-cols-6 gap-2"><b class="col-span-6">${t('manual')}</b><select id="msub" class="inp col-span-3">${opts(S.cfg.subs)}</select><input id="mm" type="number" min="1" value="${S.cfg.sm}" class="inp col-span-3" aria-label="${t('mins')}"><input id="md" type="date" value="${td}" class="inp col-span-4"><button class="btn col-span-2" onclick="addL()">${t('add')}</button></div>
+<div class="card"><b>${t('log')} · ${t('today')}</b>${tl.length?tl.map(l=>`<div class="flex justify-between py-2 border-b" style="border-color:var(--line)"><span>${l.s}</span><span class="mut">${l.m} ${t('min')} <button onclick="lx('${l.id}')" aria-label="delete">✕</button></span></div>`).join(''):`<p class="mut mt-2">${t('none')}</p>`}</div></div>`}
+function addL(){S.logs.push({id:uid(),date:v('md'),s:v('msub'),m:Math.max(1,+v('mm')||1)});save();toast(t('saved'));render()}
+function lx(id){S.logs=S.logs.filter(l=>l.id!=id);save();render()}
+function logT(m){S.logs.push({id:uid(),date:dk(new Date()),s:tm.sub,m:Math.max(1,m)});save()}
+function tmGo(){tm.run=!tm.run;render()}
+function tmReset(){tm.run=false;tm.mode='f';tm.left=S.cfg.sm*60;render()}
+function tmFin(){logT(Math.round((S.cfg.sm*60-tm.left)/60));tm.mode='b';tm.left=S.cfg.bm*60;tm.run=false;toast(t('saved'));render()}
+function tests(){const td=dk(new Date()),ty=['fri','prac','exam'],all=S.tests.slice().sort((a,b)=>a.date<b.date?1:-1),wp=all.filter(x=>x.w&&!x.rev);
+return `<div class="fade space-y-3">${exCard()}<div class="card grid grid-cols-6 gap-2"><select id="ty" class="inp col-span-3">${ty.map(k=>`<option value="${k}">${t(k)}</option>`).join('')}</select><input id="td" type="date" value="${td}" class="inp col-span-3"><select id="ts" class="inp col-span-2">${opts(S.cfg.subs)}</select><input id="tsc" type="number" min="0" class="inp col-span-2" placeholder="${t('score')}"><input id="tmx" type="number" min="1" value="100" class="inp col-span-2" aria-label="${t('max')}"><textarea id="tw" rows="2" class="inp col-span-6" placeholder="${t('weak')}"></textarea><button class="btn col-span-6" onclick="addT()">${t('save')}</button></div>
+${wp.length?`<div class="card"><b class="pri">${t('rev')}</b>${wp.map(x=>`<div class="flex items-start gap-3 mt-3"><button class="ck" onclick="tr('${x.id}')" aria-label="${t('done')}"></button><div><b>${x.s}</b><div class="mut text-sm">${x.w}</div></div></div>`).join('')}</div>`:''}
+${all.map(x=>{const p=Math.round(x.sc/x.mx*100);return `<div class="card"><div class="flex justify-between"><b>${x.s} · <span class="mut font-normal">${t(x.ty)}</span></b><button class="mut" onclick="tx('${x.id}')" aria-label="delete">✕</button></div><div class="flex justify-between text-sm mut my-1"><span>${x.date}</span><span class="pri font-bold">${x.sc}/${x.mx} · ${p}%</span></div>${bar(p)}${x.w?`<p class="text-sm mt-2 mut">${x.w}</p>`:''}</div>`}).join('')||`<p class="mut text-center py-6">${t('none')}</p>`}</div>`}
+function addT(){if(v('tsc')==='')return;S.tests.push({id:uid(),ty:v('ty'),date:v('td'),s:v('ts'),sc:+v('tsc'),mx:Math.max(1,+v('tmx')||100),w:v('tw').trim(),rev:false});save();toast(t('saved'));render()}
+function tr(id){const x=S.tests.find(y=>y.id==id);x.rev=true;save();render()}
+function tx(id){S.tests=S.tests.filter(x=>x.id!=id);save();render()}
+function settings(){const c=S.cfg,q=f=>{const a=S.logs.filter(f);return[a.reduce((s,l)=>s+l.m,0),a.length]},W=wk(new Date()),M=per('month'),rows=[['totw',q(l=>wk(pd(l.date))==W)],['totm',q(l=>per('month',pd(l.date))==M)],['tota',q(()=>true)]],tot=`<div class="card grid grid-cols-3 gap-3">${rows.map(([k,[m,n]])=>`<div class="text-center"><div class="text-2xl font-bold pri">${(m/60).toFixed(1)}</div><div class="mut text-xs">${t('hr')}</div><div class="text-sm mt-1">${t(k)}</div><div class="mut text-xs mt-1">${m} ${t('min')} · ${n} ${t('ses')}</div></div>`).join('')}</div>`;
+return `<div class="fade space-y-3">${tot}<button class="btn g w-full" onclick="cfgOpen=!cfgOpen;render()" aria-expanded="${cfgOpen}">⚙️ ${t('cfg')} ${cfgOpen?'▲':'▼'}</button>${cfgOpen?`<div class="card grid grid-cols-3 gap-3"><label class="text-sm mut">${t('sm')}<input id="c1" type="number" min="1" class="inp mt-1" value="${c.sm}"></label><label class="text-sm mut">${t('bm')}<input id="c2" type="number" min="1" class="inp mt-1" value="${c.bm}"></label><label class="text-sm mut">${t('pd')}<input id="c3" type="number" min="1" class="inp mt-1" value="${c.pd}"></label><label class="text-sm mut col-span-3">${t('sl')}<textarea id="c4" rows="2" class="inp mt-1">${c.subs.join('، ')}</textarea></label><label class="text-sm mut col-span-3">${t('dg')}<input id="c5" type="number" min="0.5" step="0.5" class="inp mt-1" value="${c.dg}"></label><button class="btn col-span-3" onclick="saveC()">${t('save')}</button></div>`:''}
+<div class="card flex gap-2"><button class="btn g flex-1" onclick="S.cfg.lang=S.cfg.lang=='ar'?'en':'ar';save();apply();render()">${t('lang')}: ${S.cfg.lang=='ar'?'العربية → EN':'EN → العربية'}</button><button class="btn g flex-1" onclick="S.cfg.theme=S.cfg.theme=='dark'?'light':'dark';save();apply();render()">${t('theme')}: ${S.cfg.theme=='dark'?'🌙':'☀️'}</button></div><div class="card"><p class="mut text-sm mb-2">${t('bkh')}</p><textarea id="bk" rows="3" class="inp mb-2"></textarea><div class="flex gap-2"><button class="btn g flex-1" onclick="expD()">${t('exp')}</button><button class="btn g flex-1" onclick="impD()">${t('imp')}</button></div></div></div>`}
+function saveC(){const c=S.cfg,s=v('c4').split(/[,،]/).map(x=>x.trim()).filter(Boolean);c.sm=Math.max(1,+v('c1')||45);c.bm=Math.max(1,+v('c2')||10);c.pd=Math.max(1,+v('c3')||6);c.dg=Math.max(.5,+v('c5')||3);if(s.length)c.subs=s;tm.sub=c.subs[0];if(!tm.run&&tm.mode=='f')tm.left=c.sm*60;save();toast(t('saved'));render()}
+function render(){$('app').innerHTML=`<div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold">${t('app')}</h1><span id="sy" class="mut text-xs"></span><span class="mut text-sm">${new Date().toLocaleDateString(S.cfg.lang=='ar'?'ar-IQ':'en-GB',{weekday:'long',day:'numeric',month:'short'})}</span></div>`+({dash,goals,study,tests,settings}[page])();
+$('nav').innerHTML=[['dash','🏠'],['goals','🎯'],['study','⏱'],['tests','📝'],['set','⚙️']].map(([k,i])=>`<button class="nv ${k==({settings:'set'}[page]||page)?'on':''}" onclick="page='${k=='set'?'settings':k}';render();scrollTo(0,0)"><span>${i}</span>${t(k)}</button>`).join('');paintSync()}
+setInterval(()=>{if(!tm.run)return;tm.left--;if(tm.left<=0){if(tm.mode=='f'){logT(S.cfg.sm);tm.mode='b';tm.left=S.cfg.bm*60;toast('✓ '+t('saved'))}else{tm.mode='f';tm.left=S.cfg.sm*60;tm.run=false}render()}else{const e=$('tmv');if(e)e.textContent=mm(tm.left)}},1000);
+apply();render();
+const KEY='otr_key';let ak='';try{ak=localStorage.getItem(KEY)||''}catch(e){}
+const api=async(m,b)=>{const r=await fetch('/api/data',{method:m,headers:{'x-key':ak,'content-type':'application/json'},body:b});if(r.status==401)throw 401;if(!r.ok)throw r.status;return r.json()};
+(async()=>{try{
+if(!ak){ak=(prompt(S.cfg.lang=='ar'?'أدخل مفتاح الحماية':'Enter your app key')||'').trim();try{localStorage.setItem(KEY,ak)}catch(e){}}
+const r=await api('GET');cloud={set:d=>api('PUT',JSON.stringify(d))};
+if(r&&r.json){const x=JSON.parse(r.json);if((x.ts||0)>(S.ts||0)){S=x;S.exams=S.exams||[];S.cfg.dg=S.cfg.dg||3;try{localStorage.setItem('otr1',JSON.stringify(S))}catch(e){}apply();tm.sub=S.cfg.subs[0];tm.left=S.cfg.sm*60;sy='ok';render();return}}
+sy='..';push()}catch(e){if(e===401){try{localStorage.removeItem(KEY)}catch(x){}ak=''}sy='err';paintSync()}})();
+
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
